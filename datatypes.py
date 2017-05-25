@@ -305,32 +305,47 @@ def create_dirinfo(location, first_dir, filler, object_params=None):
 class DirectoryInfo(object):
     """Stores all of the information of the contents of a directory"""
 
-    def __init__(self, name='', to_merge=None,
-                 directories=None, files=None):
+    def __init__(self, name, to_merge=None):
         """ Create the directory information
 
         :param str name: The name of the directory
         :param list to_merge: If this is set, the infos in the
                               list are merged into a master DirectoryInfo.
-        :param list directories: List of subdirectories inside the directory
-        :param list files: List of tuples containing information about files
-                           in the directory.
         """
 
+        # Build the tree
         if to_merge:
-            self.directories = to_merge
+            dir_infos = iter(sorted(to_merge, key=lambda x: x.name))
+            prev_dir = next(dir_infos)
+            self.directories = prev_dir
+            prev_dir.parent = self
+            for next_dir in dir_infos:
+                prev_dir.sibling = next_dir
+                next_dir.parent = self
+                prev_dir = next_dir
 
         else:
-            self.directories = directories or []
+            self.directories = None
 
-        self.timestamp = time.time()
         self.name = name
+        self.parent = None
+        self.sibling = None
+        self.timestamp = time.time()
         self.hash = None
         self.files = []
-        self.add_files(files)
         self.mtime = None
 
         self.can_compare = False
+
+    def __iter__(self):
+        """
+        Iterates over siblings
+        """
+        output = self.directories
+        while output:
+            yield output
+            output = output.sibling
+        raise StopIteration
 
     def add_files(self, files):
         """
@@ -365,6 +380,8 @@ class DirectoryInfo(object):
                                     name != '_unlisted_')
                 })
 
+        self.files.sort(key=lambda x: x['name'])
+
     def add_file_list(self, file_infos):
         """
         Add a list of tuples containing file_name, file_size to the node.
@@ -376,6 +393,7 @@ class DirectoryInfo(object):
 
         files = []
         directory = ''
+        prev_node = self
 
         for file_info in file_infos:
 
@@ -391,14 +409,15 @@ class DirectoryInfo(object):
                 files.append((os.path.basename(name), size, timestamp))
             else:
                 # When changing directories, append the files gathered in the last directory
-                self.get_node(directory).add_files(files)
+                prev_node = self.get_node(directory, start_from=prev_node)
+                prev_node.add_files(files)
                 # Get the new directory name
                 directory = os.path.dirname(name[len(self.name):].lstrip('/'))
                 # Reset the files list
                 files = [(os.path.basename(name), size, timestamp)]
 
         # Add data from the last directory
-        self.get_node(directory).add_files(files)
+        self.get_node(directory, start_from=prev_node).add_files(files)
 
     def setup_hash(self):
         """
@@ -408,12 +427,10 @@ class DirectoryInfo(object):
         hasher = hashlib.sha1()
 
         # Sort the sub-directories and files
-        self.directories.sort(key=lambda x: x.name)
-        self.files.sort(key=lambda x: x['name'])
 
         hasher.update(self.name)
 
-        for directory in self.directories:
+        for directory in self:
             # Recursively make the hash for each subdirectory first
             directory.setup_hash()
             # Can compare if a subdirectory asks for it
@@ -481,42 +498,105 @@ class DirectoryInfo(object):
                        (file_info['mtime'], file_info['size'],
                         file_info['hash'], file_info['name']))
 
-        for directory in self.directories:
+        for directory in self:
             # Recursively get displays for sub-directories
             output += '\n' + directory.displays(os.path.join(path, directory.name))
 
         return output
 
-    def get_node(self, path, make_new=True):
+    def get_node(self, path, make_new=True, start_from=None):
         """ Get the node that corresponds to the path given.
         If the node does not exist yet, and ``make_new`` is True, the node is created.
 
         :param str path: Path to the desired node from current node.
                          If the path does not exist yet, empty nodes will be created.
         :param str make_new: Bool to create new node if none exists at path or not
+        :param DirectoryInfo start_from: A directory info to start from in the same tree
         :returns: A node with the proper path, unless make_new is False and the node doesn't exist
         :rtype: DirectoryInfo or None
         """
 
-        # If any path left
+        # If any path
         if path:
+            path = path.rstrip('/')
             split_path = path.split('/')
+
+            # Here is some mess for you
+            if start_from:
+                start_path = start_from.full_path(self).rstrip('/')
+                if path == start_path:
+                    return start_from
+
+                split_start = start_path.split('/')
+                num_agree = 0
+                for index, directory in enumerate(split_path):
+                    if split_start[index] == directory:
+                        num_agree += 1
+                    else:
+                        break
+
+                level = start_from.level() - self.level()
+                # If starting in the right place, skip this mess
+                if num_agree == level:
+                    return start_from.get_node('/'.join(split_path[num_agree:]), make_new)
+
+                # Traverse backwards to get to right part of tree
+                for _ in xrange(level - num_agree - 1):
+                    start_from = start_from.parent
+                # If we passed our directory, go back one more, and skip mess
+                if num_agree == len(split_path) or split_path[num_agree] < split_start[num_agree]:
+                    return start_from.parent.get_node('/'.join(split_path[num_agree:]), make_new)
+
+                # Otherwise, we traverse the tree to find the correct node, if it exists
+                next_name = split_start[num_agree]
+                prev_node = start_from
+                while split_path[num_agree] > next_name:
+                    prev_node = start_from
+                    start_from = start_from.sibling
+                    if start_from is None:
+                        if not make_new:
+                            return None
+                        new_node = DirectoryInfo(split_path[num_agree])
+                        prev_node.sibling = new_node
+                        new_node.parent = prev_node.parent
+                        return new_node.get_node('/'.join(split_path[num_agree + 1:]), make_new)
+                    next_name = start_from.name
+
+                if split_path[num_agree] == next_name:
+                    return start_from.get_node('/'.join(split_path[num_agree + 1:]), make_new)
+                new_node = DirectoryInfo(split_path[num_agree])
+                prev_node.sibling = new_node
+                new_node.parent = prev_node.parent
+                new_node.sibling = start_from
+                return new_node.get_node('/'.join(split_path[num_agree + 1:]), make_new)
+
+            # This is where we are when messes are skipped
+
             return_name = '/'.join(split_path[1:])
 
             LOG.debug('path remaining: %s, searching for %s', path, split_path[0])
 
             # Search for if directory exists
-            LOG.debug('There are %i directories', len(self.directories))
-            for directory in self.directories:
-                LOG.debug('Checking %s', directory.name)
+            prev = None
+            for directory in self:
                 if split_path[0] == directory.name:
-                    LOG.debug('Found match!')
                     return directory.get_node(return_name, make_new)
+                if directory.name > split_path[0]:
+                    break
+                prev = directory
 
             # If not, make a new directory, or None
             if make_new:
                 new_dir = DirectoryInfo(split_path[0])
-                self.directories.append(new_dir)
+                new_dir.parent = self
+                # If something in front, insert the new directory
+                if prev:
+                    new_dir.sibling = prev.sibling
+                    prev.sibling = new_dir
+                # Otherwise, add it to the beginning of the directories list
+                else:
+                    new_dir.sibling = self.directories
+                    self.directories = new_dir
                 return new_dir.get_node(return_name, make_new)
 
             return None
@@ -539,7 +619,7 @@ class DirectoryInfo(object):
 
         num_files = len([fi for fi in self.files \
                              if (fi['name'] == '_unlisted_') == unlisted])
-        for directory in self.directories:
+        for directory in self:
             num_files += directory.get_num_files(unlisted, place_new)
 
         if place_new and not self.can_compare:
@@ -560,7 +640,7 @@ class DirectoryInfo(object):
 
         for _ in xrange(levels):
             if output.directories:
-                output = output.directories[0]
+                output = output.directories
             else:
                 break
 
@@ -593,7 +673,7 @@ class DirectoryInfo(object):
             # If there is a match in the hash, then the nodes are effectively identical
             # Otherwise, do these recursive comparisons
             if self.hash != other.hash:
-                for directory in self.directories:
+                for directory in self:
                     # Ignore not comparable directories (usually new ones)
                     if not directory.can_compare:
                         continue
@@ -641,7 +721,7 @@ class DirectoryInfo(object):
                         extra_size += file_info['size']
 
             # All directories are extra too
-            for directory in self.directories:
+            for directory in self:
                 more_files, _, more_size = directory.compare(None, here, check)
                 extra_size += more_size
                 extra_files.extend(more_files)
@@ -661,7 +741,7 @@ class DirectoryInfo(object):
         else:
             count_this = 1
 
-        return sum([directory.count_nodes(empty) for directory in self.directories], count_this)
+        return sum([directory.count_nodes(empty) for directory in self], count_this)
 
     def empty_nodes_list(self):
         """
@@ -673,7 +753,7 @@ class DirectoryInfo(object):
             return []
 
         to_return = [os.path.join(self.name, empty) for empty in \
-                         sum([directory.empty_nodes_list() for directory in self.directories],
+                         sum([directory.empty_nodes_list() for directory in self],
                              [])]
 
         count_self = [] if self.get_num_files(place_new=True) else [self.name]
@@ -702,7 +782,7 @@ class DirectoryInfo(object):
 
         # Print the contents of a directory picked next, and return that DirectoryInfo
         if args:
-            return self.directories[args[0]].listdir(*args[1:], printing=printing)
+            return list(self)[args[0]].listdir(*args[1:], printing=printing)
 
         # If we got to the last directory of the args, print the files contained
         elif printing:
@@ -710,12 +790,12 @@ class DirectoryInfo(object):
 
             # Get the formatting width for printing the directory names
             if self.directories:
-                width = max([len(di.name) for di in self.directories]) + 2
+                width = max([len(di.name) for di in self]) + 2
             else:
                 width = 0
 
             # Print information for each directory
-            for index, directory in enumerate(self.directories):
+            for index, directory in enumerate(self):
                 print '%3i: %-{0}s Hash: %s  Num Files: %7i  Dirs Unlisted: %7i'.format(width) % \
                     (index, directory.name, directory.hash,
                      directory.get_num_files(), directory.get_num_files(True))
@@ -749,6 +829,30 @@ class DirectoryInfo(object):
                 return file_info
 
         return None
+
+    def level(self):
+        """
+        :returns: The level of this directory, starting at 0 at the root
+        :rtype: int
+        """
+
+        if self.parent is None:
+            return 0
+        return self.parent.level() + 1
+
+    def full_path(self, stop_at=None):
+        """
+        :param DirectoryInfo stop_at: Give the relative path from the given directory
+        :returns: The full name of the directory info
+        :rtype: str
+        """
+
+        if self == stop_at:
+            return ''
+
+        if self.parent:
+            return os.path.join(self.parent.full_path(stop_at), self.name)
+        return self.name
 
 def get_info(file_name):
     """
