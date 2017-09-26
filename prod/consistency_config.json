@@ -6,7 +6,7 @@
   "ListAge": 2,
   "IgnoreAge": 14,
   "RedirectorAge": 50,
-  "CacheLocation": "/home/dynamo/consistency_check/OpsSpace/ConsistencyCheck/prod/consistency_cache",
+  "CacheLocation": "/scratch5/dabercro/consistency_cache",
   "Redirectors": {
     "T3_CH_PSI": "t3se01.psi.ch",
     "T3_US_MIT": "t3serv006.mit.edu"
@@ -28,8 +28,9 @@
   ],
   "SaveCache": 1,
   "UseLoadBalancer": [
-    "T2_US_Vanderbilt"
+    "T2_US_Vanderbilt",
+    "T2_US_Florida"
   ],
-  "WebDir": "/var/www/html/dynamo/consistency",
+  "WebDir": "/home/dabercro/public_html/ConsistencyCheck",
   "MaxMissing": 10000
 }
