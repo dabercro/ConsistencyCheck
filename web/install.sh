@@ -34,7 +34,7 @@ cp output.html stats.php stylin.css explanations.html $TARGET
 
 if [ "$USER" != "dynamo" ]
 then
-    sed -i 's@<body>@<body> <p style="color:#ff0000;font-weight:bold;">Note: As we finish commissioning of US T2 sites, this is transistioning into a development/test instance of the webpage. See the production summary <a href="http://dynamo.mit.edu/consistency/">here</a>.</p>@' $TARGET/output.html
+    sed -i 's@<body>@<body> <p style="color:#ff0000;font-weight:bold;font-size:200%;">Note: As we finish commissioning of US T2 sites, this is transistioning into a development/test instance of the webpage. See the production summary <a href="http://dynamo.mit.edu/consistency/">here</a>.</p>@' $TARGET/output.html
 fi
 
 exit $?
