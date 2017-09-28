@@ -303,7 +303,7 @@ def main(site):
 
             if not output:
                 LOG.warning('The following SQL statement failed: %s',
-                          blocks_query % (line.strip(), site))
+                            blocks_query % (line.strip(), site))
                 LOG.warning('Most likely cause is dynamo update between the listing and now')
                 from_phedex = get_json('cmsweb.cern.ch', '/phedex/datasvc/json/prod/filereplicas',
                                        params={'node': site, 'LFN': line.strip()}, use_cert=True)
