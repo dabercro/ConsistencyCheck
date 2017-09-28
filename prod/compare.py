@@ -186,7 +186,7 @@ def main(site):
     # Whether or not to skip entering missing files into the registry
     skip_enter = len(missing) > int(config.config_dict()['MaxMissing'])
     if skip_enter:
-        LOG.error('Too many missing files: %i, you should investigate.', len(missing))
+        LOG.warning('Too many missing files: %i, you should investigate.', len(missing))
 
     # Enter things for site in registry
     if os.environ['USER'] == 'dynamo':
@@ -302,9 +302,9 @@ def main(site):
             output = inv_sql.query(blocks_query, line.strip(), site)
 
             if not output:
-                LOG.error('The following SQL statement failed: %s',
+                LOG.warning('The following SQL statement failed: %s',
                           blocks_query % (line.strip(), site))
-                LOG.error('Most likely cause is dynamo update between the listing and now')
+                LOG.warning('Most likely cause is dynamo update between the listing and now')
                 from_phedex = get_json('cmsweb.cern.ch', '/phedex/datasvc/json/prod/filereplicas',
                                        params={'node': site, 'LFN': line.strip()}, use_cert=True)
 
