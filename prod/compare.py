@@ -123,26 +123,14 @@ def main(site):
     # First, datasets in the deletions queue can be missing
     acceptable_missing = checkphedex.set_of_deletions(site)
 
-    # Orphan files cannot belong to any dataset that should be at the site
+    # Ignored datasets will not give a full listing, so they can't be accused of having orphans
     inv_sql = MySQL(config_file='/etc/my.cnf', db='dynamo', config_group='mysql-dynamo')
     acceptable_orphans = set(
-        inv_sql.query(
-            """
-            SELECT datasets.name FROM sites
-            INNER JOIN dataset_replicas ON dataset_replicas.site_id=sites.id
-            INNER JOIN datasets ON dataset_replicas.dataset_id=datasets.id
-            WHERE sites.name=%s
-            """,
-            site)
+        inv_sql.query('SELECT name FROM datasets WHERE status=%s', 'IGNORED')
         )
 
     # Orphan files may be a result of deletion requests
     acceptable_orphans.update(acceptable_missing)
-
-    # Ignored datasets will not give a full listing, so they can't be accused of having orphans
-    acceptable_orphans.update(
-        inv_sql.query('SELECT name FROM datasets WHERE status=%s', 'IGNORED')
-        )
 
     # Do not delete anything that is protected by Unified
     protected_unmerged = get_json('cmst2.web.cern.ch', '/cmst2/unified/listProtectedLFN.txt')
