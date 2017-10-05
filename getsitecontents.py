@@ -163,7 +163,7 @@ class XRootDLister(object):
                 self.site,
                 list(
                     itertools.chain.from_iterable(
-                        [re.search('root://((.*):\d*)/', str(conn.url)).group(1, 2) for conn in \
+                        [re.search(r'root://((.*):\d*)/', str(conn.url)).group(1, 2) for conn in \
                              [self.primary_conn, self.backup_conn]]
                         )
                     )
