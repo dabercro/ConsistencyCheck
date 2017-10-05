@@ -12,6 +12,7 @@ Tool to get the files located at a site.
 import re
 import logging
 import random
+import itertools
 
 import XRootD.client
 import timeout_decorator
@@ -156,19 +157,34 @@ class XRootDLister(object):
             self.log.warning('Directory %s timed out.', path)
 
             # Reconnect
-            _, door_list = config.get_redirector(self.site,
-                                                 [self.primary_conn.url, self.backup_conn.url])
-            use_doors = random.sample(door_list, 2)
 
-            if use_doors:
-                use_doors.append(use_doors[0])
-                self.primary_conn = XRootD.client.FileSystem('%s' % use_doors[0])
-                self.backup_conn = XRootD.client.FileSystem('%s' % use_doors[1])
+            # First try to get the list of doors that are not connected in this instance
+            _, door_list = config.get_redirector(
+                self.site,
+                list(
+                    itertools.chain.from_iterable(
+                        [re.search('root://((.*):\d*)/', str(conn.url)).group(1, 2) for conn in \
+                             [self.primary_conn, self.backup_conn]]
+                        )
+                    )
+                )
+
+            # If we get any, reconnect
+            if door_list:
+
+                if len(door_list) == 1:
+                    door_list.extend(door_list)
+
+                use_doors = random.sample(door_list, 2)
+
+                self.primary_conn = XRootD.client.FileSystem(use_doors[0])
+                self.backup_conn = XRootD.client.FileSystem(use_doors[1])
+
+            # Otherwise, swap urls
             else:
-                # Swap urls
                 backup_url = str(self.backup_conn.url)
                 self.primary_conn = XRootD.client.FileSystem(backup_url)
-                self.backup_conn = XRootD.client.FileSystem('%s' % self.primary_conn.url)
+                self.backup_conn = XRootD.client.FileSystem(str(self.primary_conn.url))
 
             return self.list(path, retries + 1)
 
