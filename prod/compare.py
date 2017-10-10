@@ -118,6 +118,13 @@ def main(site):
     inv_tree = getinventorycontents.get_db_listing(site)
     site_tree = getsitecontents.get_site_tree(site)
 
+    # Get whether or not the site is debugged
+    conn = sqlite3.connect(os.path.join(webdir, 'stats.db'))
+    curs = conn.cursor()
+    curs.execute('SELECT isgood FROM sites WHERE site = ?', (site, ))
+    is_debugged = curs.fetchone()[0]
+    conn.close()
+
     # Create the function to check orphans and missing
 
     # First, datasets in the deletions queue can be missing
@@ -187,6 +194,8 @@ def main(site):
     skip_enter = len(missing) > int(config.config_dict()['MaxMissing'])
     if skip_enter:
         LOG.warning('Too many missing files: %i, you should investigate.', len(missing))
+    else:
+        skip_enter = not is_debugged
 
     # Enter things for site in registry
     if os.environ['USER'] == 'dynamo':
@@ -260,19 +269,20 @@ def main(site):
 
 
     # Only get the empty nodes that are not in the inventory tree
-    for line in orphan + \
-            [empty_node for empty_node in site_tree.empty_nodes_list() \
-                 if not inv_tree.get_node('/'.join(empty_node.split('/')[2:]),
-                                          make_new=False)]:
-        reg_sql.query(
-            """
-            INSERT IGNORE INTO `deletion_queue`
-            (`file`, `site`, `status`) VALUES
-            (%s, %s, 'new')
-            """,
-            line, site)
+    if is_debugged:
+        for line in orphan + \
+                [empty_node for empty_node in site_tree.empty_nodes_list() \
+                     if not inv_tree.get_node('/'.join(empty_node.split('/')[2:]),
+                                              make_new=False)]:
+            reg_sql.query(
+                """
+                INSERT IGNORE INTO `deletion_queue`
+                (`file`, `site`, `status`) VALUES
+                (%s, %s, 'new')
+                """,
+                line, site)
 
-        LOG.info('Deleting %s', line)
+            LOG.info('Deleting %s', line)
 
 
     reg_sql.close()
