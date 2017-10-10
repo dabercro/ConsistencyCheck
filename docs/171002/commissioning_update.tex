@@ -13,15 +13,10 @@
 
 \usecolortheme{dove}
 
-\usepackage[absolute,overlay]{textpos}
 \usefonttheme{serif}
-\usepackage{hyperref}
-\usepackage[english]{babel}
 \setbeamerfont{frametitle}{size=\Large,series=\bf\sffamily}
 \setbeamertemplate{frametitle}[default][center]
-\usepackage{siunitx}
 \usepackage{tabularx}
-\usepackage{makecell}
 
 \setbeamertemplate{navigation symbols}{}
 \usepackage{graphicx}
@@ -36,24 +31,6 @@
 \usepackage{changepage}
 
 \graphicspath{{figs/}}
-
-\newcommand{\link}[2]{\href{#2}{\textcolor{blue}{\underline{#1}}}}
-\newcommand{\clink}[2]{\link{#1}{http://t3serv001.mit.edu/~dabercro/redir/?k=#2}}}
-
-\newcommand{\twofigs}[4]{
-  \begin{columns}
-    \begin{column}{0.5\linewidth}
-      \centering
-      \textcolor{blue}{#1} \\
-      \includegraphics[width=\linewidth]{#2}
-    \end{column}
-    \begin{column}{0.5\linewidth}
-      \centering
-      \textcolor{blue}{#3} \\
-      \includegraphics[width=\linewidth]{#4}
-    \end{column}
-  \end{columns}
-}
 
 \begin{document}
 
@@ -160,18 +137,16 @@
   {\scriptsize
     \begin{tabular}{l | r | r | r}
       \hline
-      Site & Directories & \multicolumn{1}{l|}{Recovered [TB]} & \multicolumn{1}{l}{Removed [TB]} \\
-      & removed & \multicolumn{1}{l|}{(was missing)} & \multicolumn{1}{l}{(was orphan)} \\
+      Site & \multicolumn{1}{l|}{Directories} & \multicolumn{1}{l|}{Recovered [TB]} & \multicolumn{1}{l}{Removed [TB]} \\
+      & \multicolumn{1}{l|}{removed} & \multicolumn{1}{l|}{(was missing)} & \multicolumn{1}{l}{(was orphan)} \\
       \hline
       T2\_AT\_Vienna & 65,000 & 0.1 & 54 \\
       T2\_DE\_DESY & 16,000 & 0 & 100 \\
-%      T2\_US\_Caltech & 100,000 & 0 & 120 \\
       T2\_US\_Florida & 17,000 & 300 (not all us) & 2 \\
-      \hline
       T2\_US\_Nebraska & 100,000 & 10 & 275 \\
+      \hline
 %      T2\_US\_MIT &  \\ I literally don't remember
       T2\_US\_Purdue & 0 & 0.5 & 5 \\
-      \hline
       T2\_US\_UCSD & 350,000 & 16 & 75 \\
       T2\_US\_Vanderbilt & 110,000 & 0 & 157 \\
       T2\_US\_Wisconsin & 0 & 0 & 2 \\
