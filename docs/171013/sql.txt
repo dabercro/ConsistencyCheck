@@ -1,0 +1,10 @@
+curs.execute(
+    """
+    SELECT files.name, files.size
+    FROM block_replicas
+    INNER JOIN sites ON block_replicas.site_id = sites.id
+    INNER JOIN files ON block_replicas.block_id = files.block_id
+    WHERE block_replicas.is_complete = 1 AND sites.name = %s
+    ORDER BY files.name ASC
+    """,
+    (site,))

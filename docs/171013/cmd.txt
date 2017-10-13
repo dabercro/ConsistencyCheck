@@ -1,0 +1,1 @@
+./run_check.sh T2_US_MIT

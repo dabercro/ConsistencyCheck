@@ -592,7 +592,7 @@ class DirectoryInfo(object):
             logging.debug('Hashes: %s -- %s, can compare: %i -- %i',
                           self.hash, other.hash, self.can_compare, other.can_compare)
 
-            if self.hash != other.hash and (other is None or other.can_compare):
+            if self.hash != other.hash and other.can_compare:
                 for directory in self.directories:
                     # Ignore not comparable directories (usually new ones)
                     if not directory.can_compare:
