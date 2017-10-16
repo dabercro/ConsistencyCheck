@@ -143,7 +143,7 @@ def _xrd_locate(redirs, file_name, max_age):
 
     # Update, if necessary (File doesn't exist or is too old)
     if not os.path.exists(file_name) or \
-            (time.time() - os.stat(file_name).st_mtime) > max_age:
+            (max_age and (time.time() - os.stat(file_name).st_mtime) > max_age):
 
         with open(file_name, 'w') as redir_file:
 

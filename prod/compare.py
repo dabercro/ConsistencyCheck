@@ -58,6 +58,7 @@ import os
 import sqlite3
 import shutil
 import time
+import datetime
 
 from collections import defaultdict
 
@@ -111,6 +112,23 @@ def main(site):
     """
 
     start = time.time()
+
+    prev_missing = '%s_compare_missing.txt' % site
+    prev_set = set()
+    if os.path.exists(prev_missing):
+        with open(prev_missing, 'r') as prev_file:
+            for line in prev_file:
+                prev_set.add(line.strip())
+
+        os.rename(prev_missing,
+                  os.path.join(
+                      config.config_dict()['CacheLocation'],
+                      '%s.%s' % (prev_missing,
+                                 datetime.datetime.fromtimestamp(os.stat(prev_missing).st_mtime).\
+                                     strftime('%y%m%d')
+                                )
+                      )
+                 )
 
     # Open a connection temporarily to make sure we only list good sites
     status_check = MySQL(config_file='/etc/my.cnf', db='dynamo', config_group='mysql-dynamo')
@@ -229,7 +247,7 @@ def main(site):
         """
 
         # Don't add transfers if too many missing files
-        if not skip_enter:
+        if not skip_enter and (line in prev_set or not prev_set):
             for location in sites:
                 reg_sql.query(
                     """
