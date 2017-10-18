@@ -180,6 +180,8 @@ def get_redirector(site, banned_doors=None):
     redirector = config.get('Redirectors', {}).get(site, '')
     redirs = []
 
+    domain = get_domain(site)
+
     # If not hard-coded, get the redirector
     if not redirector:
         # First check the cache
@@ -189,7 +191,6 @@ def get_redirector(site, banned_doors=None):
                     file_name, max_age)
 
         # Parse for a correct redirector
-        domain = get_domain(site)
         with open(file_name, 'r') as redir_file:
             for line in redir_file:
                 if domain in line:
@@ -207,7 +208,7 @@ def get_redirector(site, banned_doors=None):
     # Get the list of doors
     with open(list_name, 'r') as list_file:
         local_list = list(set([line.strip() for line in list_file \
-                                   if line.strip() not in banned_doors]))
+                                   if line.strip() not in banned_doors and domain in line]))
 
     LOG.debug('From %s, got list %s', redirector, local_list)
 
