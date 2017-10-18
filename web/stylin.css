@@ -12,6 +12,10 @@
     color: #ffffff;
 }
 
+td {
+    white-space: nowrap;
+}
+
 body {
     max-width: 80em;
     margin: auto;

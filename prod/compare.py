@@ -120,15 +120,18 @@ def main(site):
             for line in prev_file:
                 prev_set.add(line.strip())
 
-        os.rename(prev_missing,
-                  os.path.join(
-                      config.config_dict()['CacheLocation'],
-                      '%s.%s' % (prev_missing,
-                                 datetime.datetime.fromtimestamp(os.stat(prev_missing).st_mtime).\
-                                     strftime('%y%m%d')
-                                )
-                      )
-                 )
+        if config.config_dict().get('SaveCache'):
+            prev_new_name = '%s.%s' % (prev_missing,
+                                       datetime.datetime.fromtimestamp(
+                                           os.stat(prev_missing).st_mtime).strftime('%y%m%d')
+                                      )
+        else:
+            prev_new_name = prev_missing
+
+        shutil.move(prev_missing,
+                    os.path.join(config.config_dict()['CacheLocation'],
+                                 prev_new_name)
+                   )
 
     # Open a connection temporarily to make sure we only list good sites
     status_check = MySQL(config_file='/etc/my.cnf', db='dynamo', config_group='mysql-dynamo')
