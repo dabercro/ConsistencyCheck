@@ -380,29 +380,28 @@ def main(site):
 
     # If there were permissions or connection issues, no files would be listed
     # Otherwise, copy the output files to the web directory
-    if site_tree.get_num_files():
-        shutil.copy('%s_missing_datasets.txt' % site, webdir)
-        shutil.copy('%s_missing_nosite.txt' % site, webdir)
-        shutil.copy('%s_compare_missing.txt' % site, webdir)
-        shutil.copy('%s_compare_orphan.txt' % site, webdir)
+    shutil.copy('%s_missing_datasets.txt' % site, webdir)
+    shutil.copy('%s_missing_nosite.txt' % site, webdir)
+    shutil.copy('%s_compare_missing.txt' % site, webdir)
+    shutil.copy('%s_compare_orphan.txt' % site, webdir)
 
-        # Update the runtime stats on the stats page
-        conn = sqlite3.connect(os.path.join(webdir, 'stats.db'))
-        curs = conn.cursor()
+    # Update the runtime stats on the stats page
+    conn = sqlite3.connect(os.path.join(webdir, 'stats.db'))
+    curs = conn.cursor()
 
-        curs.execute('INSERT INTO stats_history SELECT * FROM stats WHERE site=?', (site, ))
-        curs.execute(
-            """
-            REPLACE INTO stats VALUES
-            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DATETIME(DATETIME(), "-4 hours"), ?)
-            """,
-            (site, time.time() - start, site_tree.get_num_files(),
-             site_tree.count_nodes(), len(site_tree.empty_nodes_list()),
-             config.config_dict().get('NumThreads', config.config_dict().get('MinThreads', 0)),
-             len(missing), m_size, len(orphan), o_size, len(no_source_files)))
+    curs.execute('INSERT INTO stats_history SELECT * FROM stats WHERE site=?', (site, ))
+    curs.execute(
+        """
+        REPLACE INTO stats VALUES
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DATETIME(DATETIME(), "-4 hours"), ?)
+        """,
+        (site, time.time() - start, site_tree.get_num_files(),
+         site_tree.count_nodes(), len(site_tree.empty_nodes_list()),
+         config.config_dict().get('NumThreads', config.config_dict().get('MinThreads', 0)),
+         len(missing), m_size, len(orphan), o_size, len(no_source_files)))
 
-        conn.commit()
-        conn.close()
+    conn.commit()
+    conn.close()
 
 
 if __name__ == '__main__':

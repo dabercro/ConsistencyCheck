@@ -59,9 +59,11 @@
            $background_missing = ($row['missing'] > 100) ? $bad_background : '';
            $background_nosource = ($row['nosource'] > $row['files']/10) ? $bad_background : '';
            $background_orphan = ($row['orphan'] > $row['files']/10) ? $bad_background : '';
+           $background_files = ($row['files'] == 0) ? $bad_background : '';
            printf (
-             '<tr><td>%s</td><td>%s</td><td>%.0f</td><td>%d</td><td>%d</td><td>%d</td><td%s><a href="%s_compare_missing.txt">%d</a> [<a href="%s_missing_datasets.txt">blocks</a>]</td><td%s><a href="%s_missing_nosite.txt">%d</a></td><td>%.2f</td><td%s><a href="%s_compare_orphan.txt">%d</a></td><td>%.2f</td></tr>',
-             $row['entered'], $row['site'], $row['time']/60., $row['files'], $row['nodes'], $row['emtpy'],
+             '<tr><td>%s</td><td%s>%s</td><td>%.0f</td><td%s>%d</td><td>%d</td><td>%d</td><td%s><a href="%s_compare_missing.txt">%d</a> [<a href="%s_missing_datasets.txt">blocks</a>]</td><td%s><a href="%s_missing_nosite.txt">%d</a></td><td>%.2f</td><td%s><a href="%s_compare_orphan.txt">%d</a></td><td>%.2f</td></tr>',
+             $row['entered'], $background_files, $row['site'], $row['time']/60.,
+             $background_files, $row['files'], $row['nodes'], $row['emtpy'],
              $background_missing, $row['site'], $row['missing'], $row['site'],
              $background_nosource, $row['site'], $row['nosource'], $row['m_size']/pow(1024.,4),
              $background_orphan, $row['site'], $row['orphan'], $row['o_size']/pow(1024.,4));

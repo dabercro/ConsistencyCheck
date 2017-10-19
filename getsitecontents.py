@@ -214,6 +214,10 @@ def get_site_tree(site):
     balancer, door_list = config.get_redirector(site)
     LOG.debug('Full redirector list: %s', door_list)
 
+    if not door_list:
+        LOG.error('No doors found. Returning emtpy tree')
+        return datatypes.DirectoryInfo(name='/store')
+
     # Bool to determine if using both doors in each connection
     do_both = bool(site in config.config_dict().get('BothList', []))
 
@@ -245,8 +249,5 @@ def get_site_tree(site):
             for directory in config.config_dict().get('DirectoryList', [])
         ]
 
-    # Merge the DirectoryInfo
-    info = datatypes.DirectoryInfo(name='/store', to_merge=directories)
-
     # Return the DirectoryInfo
-    return info
+    return datatypes.DirectoryInfo(name='/store', to_merge=directories)
