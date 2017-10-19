@@ -30,6 +30,8 @@ fi
 
 test -d $TARGET || mkdir -p $TARGET
 
+test -f $TARGET/stats.db || cat $0/maketables.sql | sqlite3 $TARGET/stats.db
+
 cp output.html stats.php stylin.css explanations.html $TARGET
 
 if [ "$USER" != "dynamo" ]

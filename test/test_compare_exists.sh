@@ -8,5 +8,8 @@
 #
 # for documentation on the production script
 #
+# Now it also checks for prod/run_checks.sh!
+#
 
-test -f $(dirname $0)/../prod/compare.py || exit 1000
+test -f $(dirname $0)/../prod/compare.py || exit 2
+test -f $(dirname $0)/../prod/run_checks.sh || exit 4
