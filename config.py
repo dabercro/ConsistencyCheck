@@ -201,6 +201,10 @@ def get_redirector(site, banned_doors=None):
                 if domain in line:
                     redirs.append(line.strip())
 
+        if not redirs:
+            LOG.error('Could not get redirector for %s with domain %s', site, domain)
+            return '', []
+
         redirector = redirs[0]
     else:
         redirs.append(redirector)

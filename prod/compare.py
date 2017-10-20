@@ -133,19 +133,33 @@ def main(site):
                                  prev_new_name)
                    )
 
+    # All of the files and summary will be dumped here
+    webdir = config.config_dict()['WebDir']
+
     # Open a connection temporarily to make sure we only list good sites
     status_check = MySQL(config_file='/etc/my.cnf', db='dynamo', config_group='mysql-dynamo')
     status = status_check.query('SELECT status FROM sites WHERE name = %s', site)[0]
 
     if status != 'ready':
         LOG.error('Site %s status is %s', site, status)
+
+        # Note the attempt to do listing
+        conn = sqlite3.connect(os.path.join(webdir, 'stats.db'))
+        curs = conn.cursor()
+        curs.execute(
+            """
+            REPLACE INTO stats VALUES
+            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DATETIME(DATETIME(), "-4 hours"), ?)
+            """,
+            (site, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
+
+        conn.commit()
+        conn.close()
+
         exit(0)
 
     # Close the connection while we are getting the trees together
     status_check.close()
-
-    # All of the files and summary will be dumped here
-    webdir = config.config_dict()['WebDir']
 
     inv_tree = getinventorycontents.get_db_listing(site)
     site_tree = getsitecontents.get_site_tree(site)

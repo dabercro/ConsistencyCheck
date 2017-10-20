@@ -56,8 +56,8 @@
         </tr>
 <?php
          while ($row = $results->fetchArray()) {
-           $bad_background = ' style="background-color:#ef6f6f;"';
-           $queued_background = ' style="background-color:#ccffff;"';
+           $bad_background = ' style="background-color:#ff6666;"';
+           $queued_background = ' style="background-color:#66ffff;"';
            $good_background = ' style="background-color:#66ff66;"';
            $background_missing = ($row['missing'] > 100) ? $bad_background : '';
            $background_nosource = ($row['nosource'] > $row['files']/10) ? $bad_background : '';
@@ -69,8 +69,8 @@
              $background_site = ($row['isrunning'] == 2) ? $good_background : $queued_background;
            }
            printf (
-             '<tr><td>%s</td><td%s>%s</td><td>%.0f</td><td%s>%d</td><td>%d</td><td>%d</td><td%s><a href="%s_compare_missing.txt">%d</a> [<a href="%s_missing_datasets.txt">blocks</a>]</td><td%s><a href="%s_missing_nosite.txt">%d</a></td><td>%.2f</td><td%s><a href="%s_compare_orphan.txt">%d</a></td><td>%.2f</td></tr>',
-             $row['entered'], $background_site, $row['site'], $row['time']/60.,
+             '<tr><td>%s</td><td%s><a href="%s.log">%s</a></td><td>%.0f</td><td%s>%d</td><td>%d</td><td>%d</td><td%s><a href="%s_compare_missing.txt">%d</a> [<a href="%s_missing_datasets.txt">blocks</a>]</td><td%s><a href="%s_missing_nosite.txt">%d</a></td><td>%.2f</td><td%s><a href="%s_compare_orphan.txt">%d</a></td><td>%.2f</td></tr>',
+             $row['entered'], $background_site, $row['site'], $row['site'], $row['time']/60.,
              $background_files, $row['files'], $row['nodes'], $row['emtpy'],
              $background_missing, $row['site'], $row['missing'], $row['site'],
              $background_nosource, $row['site'], $row['nosource'], $row['m_size']/pow(1024.,4),

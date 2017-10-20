@@ -81,9 +81,13 @@ then
         # Report running
         echo "UPDATE sites SET isrunning = 2 WHERE site = '$SITE';" | sqlite3 $DATABASE
 
+        LOGFILE=${SITE}_$(date +%y%m%d_%H%M%S).log
+
         # Run
-        echo "PYTHONPATH=$(dirname $(dirname $HERE)):$HOME/dynamo/lib $HERE/compare.py $SITE watch &> $LOGLOCATION/${SITE}_$(date +%y%m%d_%H%M%S).log"
-        sleep 10
+        PYTHONPATH=$(dirname $(dirname $HERE)):$HOME/dynamo/lib $HERE/compare.py $SITE watch &> $LOGLOCATION/$LOGFILE
+
+        # Copy log file to web location
+        cp $LOGLOCATION/$LOGFILE $(jq -r '.WebDir' $HERE/consistency_config.json)/${SITE}.log
 
         # Unlock
         echo "UPDATE sites SET isrunning = 0 WHERE site = '$SITE';" | sqlite3 $DATABASE
