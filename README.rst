@@ -4,6 +4,7 @@ ConsistencyCheck
 |build|
 
 .. contents:: :local:
+   :depth: 2
 
 Compares files on site to files in the dynamo inventory.
 This tool requires ``dynamo`` and ``xrdfs`` to be installed separately.
@@ -49,7 +50,19 @@ The configuration in production is the following.
 
 .. program-output:: cat ../ConsistencyCheck/prod/consistency_config.json
 
+Comparison Script
+-----------------
+
 .. automodule:: compare
+
+Automatic Site Selection
+------------------------
+
+To automatically run ``prod/compare.py`` over a few well-deserving sites, use ``prod/run_checks.sh``.
+
+.. autoanysrc:: phony
+   :src: ../ConsistencyCheck/prod/run_checks.sh
+   :analyzer: perl-script
 
 Reference
 +++++++++

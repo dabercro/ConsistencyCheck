@@ -32,7 +32,7 @@ test -d $TARGET || mkdir -p $TARGET
 
 test -f $TARGET/stats.db || cat $0/maketables.sql | sqlite3 $TARGET/stats.db
 
-cp output.html stats.php stylin.css explanations.html $TARGET
+cp output.html stats.php stylin.css explanations.html sorttable.js $TARGET
 
 if [ "$USER" != "dynamo" ]
 then

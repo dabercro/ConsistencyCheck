@@ -3,7 +3,7 @@
 NUMBER=$1
 MATCH=$2
 
-if [ "$NUMBER" = "-h" -o "$NUMBER" = "--help" ]
+if [ -z "$MATCH" -o "$NUMBER" = "-h" -o "$NUMBER" = "--help" ]
 then
     perldoc -T $0
     exit 0
@@ -19,8 +19,11 @@ HERE=$(cd $(dirname $0) && pwd)
 export DATABASE=$(jq -r '.WebDir' $HERE/consistency_config.json)/stats.db
 
 # Don't know why it would happen, but protect against simple SQL injection
+case $NUMBER in 
+    *';'* ) exit 1 ;;
+esac
 case $MATCH in 
-    *"'"* ) exit 1 ;;
+    *["'"';']* ) exit 1 ;;
 esac
 
 # Get the possible sites that match the constraint from dynamo
@@ -73,6 +76,9 @@ then
 
         echo "$(date) Starting run on $SITE" >> $LOGLOCATION/run_checks.log
 
+        # Report running
+        echo "UPDATE sites SET isrunning = 2 WHERE site = '$SITE';" | sqlite3 $DATABASE
+
         # Run
         PYTHONPATH=$(dirname $(dirname $HERE)):$HOME/dynamo/lib $HERE/compare.py $SITE watch &> $LOGLOCATION/${SITE}_$(date +%y%m%d_%H%M%S).log
 
@@ -94,18 +100,18 @@ exit 0
 
 =pod
 
-=head1 Usage
+=head1 Usage:
 
-   run_checks.sh MAXNUMBER MATCH
+   run_checks.sh <MAXNUMBER> <MATCH>
 
-Run the Consistency Check for sites that match the name MATCH
+runs the Consistency Check for sites that match the name MATCH
 (using a MySQL "LIKE" expression), limited to MAXNUMBER.
 Sites that have not been run before will get priority.
 After that, priority is assigned by the sites that have gone the longest
 without getting a new summary entry in the summary webpage.
 Sites that are currently running are excluded.
 
-=head1 Examples
+=head1 Examples:
 
    run_checks.sh 1 T2_US_MIT                           # If you want to run on a single site
    ListAge=0 InventoryAge=0 run_checks.sh 1 T2_US_MIT  # To get a fresh cache

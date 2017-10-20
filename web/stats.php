@@ -9,7 +9,9 @@ error_reporting(E_ALL);
   $db = new SQLite3('stats.db');
 
   if($which_sites == 'all') {
-    $results = $db->query('SELECT * FROM ' . $table . ' ORDER BY site');
+    $results = $db->query('SELECT * FROM ' . $table . 
+                          ' INNER JOIN sites on sites.site = ' . $table . 
+                          '.site ORDER BY site');
   } else {
 
     $isgood = ($which_sites == 'need_checked' || $which_sites == 'bad') ? '0' : '1';
