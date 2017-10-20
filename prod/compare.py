@@ -149,9 +149,9 @@ def main(site):
         curs.execute(
             """
             REPLACE INTO stats VALUES
-            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DATETIME(DATETIME(), "-4 hours"), ?)
+            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DATETIME(DATETIME(), "-4 hours"), ?, ?)
             """,
-            (site, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
+            (site, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
 
         conn.commit()
         conn.close()
@@ -407,18 +407,24 @@ def main(site):
     curs.execute(
         """
         REPLACE INTO stats VALUES
-        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DATETIME(DATETIME(), "-4 hours"), ?)
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DATETIME(DATETIME(), "-4 hours"), ?, ?)
         """,
         (site, time.time() - start, site_tree.get_num_files(),
          site_tree.count_nodes(), len(site_tree.empty_nodes_list()),
          config.config_dict().get('NumThreads', config.config_dict().get('MinThreads', 0)),
-         len(missing), m_size, len(orphan), o_size, len(no_source_files)))
+         len(missing), m_size, len(orphan), o_size, len(no_source_files)),
+         site_tree.get_num_files(unlisted=True))
 
     conn.commit()
     conn.close()
 
 
 if __name__ == '__main__':
+
+    # Set the config file to read locally
+    config.CONFIG_FILE = os.path.join(os.path.dirname(__file__),
+                                      'consistency_config.json')
+
     LOG.info('About to run over %s', SITES)
 
     for site_to_check in SITES:

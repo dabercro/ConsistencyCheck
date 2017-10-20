@@ -36,21 +36,24 @@
             Number Nodes
           </th>
           <th onclick="sorttable(6)">
-            Empty Nodes
+            Unlisted
           </th>
           <th onclick="sorttable(7)">
-            Num Missing
+            Empty Nodes
           </th>
           <th onclick="sorttable(8)">
-            No Source
+            Num Missing
           </th>
           <th onclick="sorttable(9)">
-            Size [TB]
+            No Source
           </th>
           <th onclick="sorttable(10)">
-            Num Orphan
+            Size [TB]
           </th>
           <th onclick="sorttable(11)">
+            Num Orphan
+          </th>
+          <th onclick="sorttable(12)">
             Size [TB]
           </th>
         </tr>
@@ -59,19 +62,25 @@
            $bad_background = ' style="background-color:#ff6666;"';
            $queued_background = ' style="background-color:#66ffff;"';
            $good_background = ' style="background-color:#66ff66;"';
+
            $background_missing = ($row['missing'] > 100) ? $bad_background : '';
            $background_nosource = ($row['nosource'] > $row['files']/10) ? $bad_background : '';
            $background_orphan = ($row['orphan'] > $row['files']/10) ? $bad_background : '';
            $background_files = ($row['files'] == 0) ? $bad_background : '';
+
            if ($row['isrunning'] == 0) {
              $background_site = $background_files;
            } else {
              $background_site = ($row['isrunning'] == 2) ? $good_background : $queued_background;
            }
+
+           $background_time = ((strtotime($row['entered']) + 24 * 3600) > time()) ? $good_background : '';
+
            printf (
-             '<tr><td>%s</td><td%s><a href="%s.log">%s</a></td><td>%.0f</td><td%s>%d</td><td>%d</td><td>%d</td><td%s><a href="%s_compare_missing.txt">%d</a> [<a href="%s_missing_datasets.txt">blocks</a>]</td><td%s><a href="%s_missing_nosite.txt">%d</a></td><td>%.2f</td><td%s><a href="%s_compare_orphan.txt">%d</a></td><td>%.2f</td></tr>',
-             $row['entered'], $background_site, $row['site'], $row['site'], $row['time']/60.,
-             $background_files, $row['files'], $row['nodes'], $row['emtpy'],
+             '<tr><td%s>%s</td><td%s><a href="%s.log">%s</a></td><td>%.0f</td><td%s>%d</td><td>%d</td><td>%d</td><td>%d</td><td%s><a href="%s_compare_missing.txt">%d</a> [<a href="%s_missing_datasets.txt">blocks</a>]</td><td%s><a href="%s_missing_nosite.txt">%d</a></td><td>%.2f</td><td%s><a href="%s_compare_orphan.txt">%d</a></td><td>%.2f</td></tr>',
+             $background_time, $row['entered'],
+             $background_site, $row['site'], $row['site'], $row['time']/60.,
+             $background_files, $row['files'], $row['nodes'], $row['unlisted'], $row['emtpy'],
              $background_missing, $row['site'], $row['missing'], $row['site'],
              $background_nosource, $row['site'], $row['nosource'], $row['m_size']/pow(1024.,4),
              $background_orphan, $row['site'], $row['orphan'], $row['o_size']/pow(1024.,4));

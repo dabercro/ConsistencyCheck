@@ -3,6 +3,8 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+  date_default_timezone_set('America/New_York');
+
   $which_sites = isset($_GET['sites']) ? $_GET['sites'] : 'good';
 
   $table = 'stats';

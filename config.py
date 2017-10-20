@@ -219,7 +219,7 @@ def get_redirector(site, banned_doors=None):
         local_list = list(set([line.strip() for line in list_file \
                                    if line.strip() not in banned_doors and domain in line]))
 
-    LOG.debug('From %s, got list %s', redirector, local_list)
+    LOG.info('From %s, got doors %s', redirector, local_list)
 
     # Return redirector and list of xrootd doors
     return (redirector, local_list)
