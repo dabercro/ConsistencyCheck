@@ -16,9 +16,7 @@ PATH=$PATH:/home/dabercro/bin
 HERE=$(cd $(dirname $0) && pwd)
 
 # Determine the SQLite3 database location from the configuration file
-DATABASE=$(jq -r '.WebDir' $HERE/consistency_config.json)/stats.db
-
-echo $DATABASE
+export DATABASE=$(jq -r '.WebDir' $HERE/consistency_config.json)/stats.db
 
 # Don't know why it would happen, but protect against simple SQL injection
 case $NUMBER in 
