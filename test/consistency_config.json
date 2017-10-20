@@ -9,6 +9,7 @@
   "IgnoreAge": 1,
   "RedirectorAge": 1,
   "CacheLocation": "cache",
+  "LogLocation": "logs",
   "Redirectors": {
     "T3_CH_PSI": "t3se01.psi.ch",
     "T3_US_MIT": "t3serv006.mit.edu"

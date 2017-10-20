@@ -28,8 +28,9 @@ esac
 ALL_SITES=$(echo "SELECT name FROM sites WHERE name LIKE '$MATCH' AND (name LIKE 'T2_%' OR name LIKE 'T1_%_Disk');" | mysql --defaults-group-suffix=-dynamo -Ddynamo --skip-column-names)
 
 # Make sure all of the sites are in the webpage's database
-echo "INSERT OR IGNORE INTO sites VALUES
-('$(echo $ALL_SITES | sed "s/ /', 0, 0), ('/g")', 0, 0);" | sqlite3 $DATABASE
+# Shove it all into one pipe to avoid too many connections
+# Basically just looping over sites and inserting them
+echo $ALL_SITES | tr ' ' '\n' | xargs -n1 -I '{SITE}' echo "INSERT OR IGNORE INTO sites VALUES ('{SITE}', 0, 0);" | sqlite3 $DATABASE
 
 # Now get a list of sites to run on
 SITES=$(echo "
@@ -66,8 +67,14 @@ then
     for SITE in $SITES
     do
 
+        # Get the location of the log files
+        LOGLOCATION=$(jq -r '.LogLocation' $HERE/consistency_config.json)
+        test -d $LOGLOCATION || mkdir -p $LOGLOCATION
+
+        echo "$(date) Starting run on $SITE" >> $LOGLOCATION/run_checks.log
+
         # Run
-        PYTHONPATH=$(dirname $(dirname $HERE)):$HOME/dynamo/lib $HERE/compare.py $SITE watch &> /local/dabercro/$SITE.log
+        PYTHONPATH=$(dirname $(dirname $HERE)):$HOME/dynamo/lib $HERE/compare.py $SITE watch &> $LOGLOCATION/${SITE}_$(date +%y%m%d_%H%M%S).log
 
         # Unlock
         echo "UPDATE sites SET isrunning = 0 WHERE site = '$SITE';" | sqlite3 $DATABASE
@@ -96,6 +103,7 @@ Run the Consistency Check for sites that match the name MATCH
 Sites that have not been run before will get priority.
 After that, priority is assigned by the sites that have gone the longest
 without getting a new summary entry in the summary webpage.
+Sites that are currently running are excluded.
 
 =head1 Examples
 

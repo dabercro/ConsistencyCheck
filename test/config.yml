@@ -11,6 +11,7 @@
 #   The two are useful separately if you want to operate in a window, but this parameter can be used
 #   to quickly fix the number of threads for a given run.
 # - **CacheLocation** - The directory where all cached information is stored
+# - **LogLocation** - The directory where all the logs are stored
 # - **InventoryAge** - The age, in days, of how old the information from the inventory can be
 # - **ListAge** - The age, in days, of how old the list of files directly from the site can be
 # - **RedirectorAge** - The age, in days, of how old the information about redirectors can be
@@ -47,6 +48,8 @@ MaxThreads: 0
 NumThreads: 0
 
 CacheLocation: cache
+
+LogLocation: logs
 
 InventoryAge: 0.00005
 

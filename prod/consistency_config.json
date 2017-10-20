@@ -5,8 +5,9 @@
   "NumThreads": 2,
   "ListAge": 2,
   "IgnoreAge": 14,
-  "RedirectorAge": 50,
-  "CacheLocation": "/scratch5/dabercro/consistency_cache",
+  "RedirectorAge": 0,
+  "CacheLocation": "/scratch5/dabercro/consistency/cache",
+  "LogLocation": "/scratch5/dabercro/consistency/logs",
   "Redirectors": {
     "T3_CH_PSI": "t3se01.psi.ch",
     "T3_US_MIT": "t3serv006.mit.edu"
@@ -26,7 +27,7 @@
     "xrootd-redic.pi.infn.it",
     "cmsxrootd1.fnal.gov"
   ],
-  "SaveCache": 1,
+  "SaveCache": 0,
   "UseLoadBalancer": [
     "T2_BR_UERJ",
     "T2_CH_CAF",

@@ -71,15 +71,16 @@ def config_dict(make_dir=True):
         output['MaxThreads'] = int(num_threads)
         output['MinThreads'] = int(num_threads)
 
-    cache_location = output.get('CacheLocation')
+    for key in ['CacheLocation', 'LogLocation']:
+        location = output.get(key)
 
-    # Create the directory holding the cache
-    if cache_location:
-        if not os.path.exists(cache_location) and make_dir:
-            os.makedirs(cache_location)
-    else:
-        raise KeyError('Configuration dictionary does not have a Cache Location set. '
-                       'Using dictionary at ' + location)
+        # Create the directory holding the cache
+        if location:
+            if not os.path.exists(location) and make_dir:
+                os.makedirs(location)
+        else:
+            raise KeyError('Configuration dictionary does not have a %s set. '
+                           'Using dictionary at %s' % (key, location))
 
     return output
 

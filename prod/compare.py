@@ -120,7 +120,7 @@ def main(site):
             for line in prev_file:
                 prev_set.add(line.strip())
 
-        if config.config_dict().get('SaveCache'):
+        if int(config.config_dict().get('SaveCache')):
             prev_new_name = '%s.%s' % (prev_missing,
                                        datetime.datetime.fromtimestamp(
                                            os.stat(prev_missing).st_mtime).strftime('%y%m%d')
