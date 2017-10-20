@@ -62,11 +62,17 @@ import datetime
 
 from collections import defaultdict
 
+from ConsistencyCheck import config
+
 # Stick this here before dynamo sets the logging config
 if __name__ == '__main__':
     if len(sys.argv) < 2 or '-h' in sys.argv or '--help' in sys.argv:
         print 'Usage: ./compare.py sitename [sitename ...] [debug/watch]'
         exit(0)
+
+    # Set the config file to read locally
+    config.CONFIG_FILE = os.path.join(os.path.dirname(__file__),
+                                      'consistency_config.json')
 
     SITES = sys.argv[1:-1]
 
@@ -87,7 +93,6 @@ if __name__ == '__main__':
 from ConsistencyCheck import getsitecontents
 from ConsistencyCheck import getinventorycontents
 from ConsistencyCheck import datatypes
-from ConsistencyCheck import config
 from ConsistencyCheck import checkphedex
 
 from CMSToolBox.webtools import get_json
@@ -412,18 +417,14 @@ def main(site):
         (site, time.time() - start, site_tree.get_num_files(),
          site_tree.count_nodes(), len(site_tree.empty_nodes_list()),
          config.config_dict().get('NumThreads', config.config_dict().get('MinThreads', 0)),
-         len(missing), m_size, len(orphan), o_size, len(no_source_files)),
-         site_tree.get_num_files(unlisted=True))
+         len(missing), m_size, len(orphan), o_size, len(no_source_files),
+         site_tree.get_num_files(unlisted=True)))
 
     conn.commit()
     conn.close()
 
 
 if __name__ == '__main__':
-
-    # Set the config file to read locally
-    config.CONFIG_FILE = os.path.join(os.path.dirname(__file__),
-                                      'consistency_config.json')
 
     LOG.info('About to run over %s', SITES)
 
