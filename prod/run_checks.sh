@@ -16,7 +16,9 @@ PATH=$PATH:/home/dabercro/bin
 HERE=$(cd $(dirname $0) && pwd)
 
 # Determine the SQLite3 database location from the configuration file
-export DATABASE=$(jq -r '.WebDir' $HERE/consistency_config.json)/stats.db
+DATABASE=$(jq -r '.WebDir' $HERE/consistency_config.json)/stats.db
+
+echo $DATABASE
 
 # Don't know why it would happen, but protect against simple SQL injection
 case $NUMBER in 
@@ -80,7 +82,8 @@ then
         echo "UPDATE sites SET isrunning = 2 WHERE site = '$SITE';" | sqlite3 $DATABASE
 
         # Run
-        PYTHONPATH=$(dirname $(dirname $HERE)):$HOME/dynamo/lib $HERE/compare.py $SITE watch &> $LOGLOCATION/${SITE}_$(date +%y%m%d_%H%M%S).log
+        echo "PYTHONPATH=$(dirname $(dirname $HERE)):$HOME/dynamo/lib $HERE/compare.py $SITE watch &> $LOGLOCATION/${SITE}_$(date +%y%m%d_%H%M%S).log"
+        sleep 10
 
         # Unlock
         echo "UPDATE sites SET isrunning = 0 WHERE site = '$SITE';" | sqlite3 $DATABASE
