@@ -31,6 +31,13 @@ If your ``CONFIG_FILE`` is not a JSON file, you'll want to change this
 also before calling :py:func:`config_dict`.
 """
 
+DIRECTORYLIST = None
+"""
+If this is set to a list of directories, it overrides the
+``DirectoryList`` set in the configuration file.
+This prevents the tool from attempting to list directories that are not there.
+"""
+
 def config_dict(make_dir=True):
     """
     :param bool make_dir: Create the cache directory if it's missing
@@ -81,6 +88,8 @@ def config_dict(make_dir=True):
         else:
             raise KeyError('Configuration dictionary does not have a %s set. '
                            'Using dictionary at %s' % (key, location))
+
+    output['DirectoryList'] = DIRECTORYLIST or output['DirectoryList']
 
     return output
 

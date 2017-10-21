@@ -167,6 +167,10 @@ def main(site):
     status_check.close()
 
     inv_tree = getinventorycontents.get_db_listing(site)
+
+    # Reset the DirectoryList for the XRootDLister to run on
+    config.DIRECTORYLIST = [directory.name for directory in inv_tree.directories]
+
     site_tree = getsitecontents.get_site_tree(site)
 
     # Get whether or not the site is debugged
