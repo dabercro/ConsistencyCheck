@@ -423,24 +423,26 @@ def main(site):
     shutil.copy('%s_compare_missing.txt' % site, webdir)
     shutil.copy('%s_compare_orphan.txt' % site, webdir)
 
-    # Update the runtime stats on the stats page
-    conn = sqlite3.connect(os.path.join(webdir, 'stats.db'))
-    curs = conn.cursor()
+    if not os.environ.get('ListAge') and not os.environ.get('InventoryAge'):
 
-    curs.execute('INSERT INTO stats_history SELECT * FROM stats WHERE site=?', (site, ))
-    curs.execute(
-        """
-        REPLACE INTO stats VALUES
-        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DATETIME(DATETIME(), "-4 hours"), ?, ?)
-        """,
-        (site, time.time() - start, site_tree.get_num_files(),
-         site_tree.count_nodes(), len(site_tree.empty_nodes_list()),
-         config.config_dict().get('NumThreads', config.config_dict().get('MinThreads', 0)),
-         len(missing), m_size, len(orphan), o_size, len(no_source_files),
-         site_tree.get_num_files(unlisted=True)))
+        # Update the runtime stats on the stats page if the listing settings are not changed
+        conn = sqlite3.connect(os.path.join(webdir, 'stats.db'))
+        curs = conn.cursor()
 
-    conn.commit()
-    conn.close()
+        curs.execute('INSERT INTO stats_history SELECT * FROM stats WHERE site=?', (site, ))
+        curs.execute(
+            """
+            REPLACE INTO stats VALUES
+            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DATETIME(DATETIME(), "-4 hours"), ?, ?)
+            """,
+            (site, time.time() - start, site_tree.get_num_files(),
+             site_tree.count_nodes(), len(site_tree.empty_nodes_list()),
+             config.config_dict().get('NumThreads', config.config_dict().get('MinThreads', 0)),
+             len(missing), m_size, len(orphan), o_size, len(no_source_files),
+             site_tree.get_num_files(unlisted=True)))
+
+        conn.commit()
+        conn.close()
 
 
 if __name__ == '__main__':
