@@ -35,4 +35,6 @@
   ],
   "WebDir": "/home/dabercro/public_html/ConsistencyCheck",
   "MaxMissing": 1000
+  "MaxMissing": 1000,
+  "MaxOrphanFraction": 0.3
 }

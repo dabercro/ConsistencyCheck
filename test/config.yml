@@ -31,7 +31,9 @@
 # - **UseLoadBalancer** - A list of sites where the main redirector of the site is used
 # - **WebDir** - The directory where text files and the sqlite3 database live
 # - **MaxMissing** - If more files than this number are missing,
-#   the missing files will not be entered into the transfer queue
+#   then missing files will not be entered into the transfer queue
+# - **MaxOrphanFraction** - If more than this fraction of files at a site are orphan files,
+#   then orphan files will not be entered into the deletion queue
 #
 ##!
 
@@ -86,3 +88,5 @@ UseLoadBalancer:
 WebDir: www
 
 MaxMissing: 100
+
+MaxOrphanFraction: 0.1

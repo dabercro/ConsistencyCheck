@@ -2,6 +2,8 @@
 
 TARGET=$1
 
+CONFIG=$(dirname $(pwd))/prod/consistency_config.json
+
 if [ "$USER" = "dynamo" ]
 then
     DEFAULT=/var/www/html/dynamo/consistency
@@ -33,6 +35,7 @@ test -d $TARGET || mkdir -p $TARGET
 test -f $TARGET/stats.db || cat $0/maketables.sql | sqlite3 $TARGET/stats.db
 
 cp output.html stats.php stylin.css explanations.html sorttable.js $TARGET
+test -f $TARGET/consistency_config.json || ln -s $CONFIG $TARGET/consistency_config.json
 
 if [ "$USER" != "dynamo" ]
 then

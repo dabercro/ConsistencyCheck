@@ -110,8 +110,8 @@ class XRootDLister(object):
 
             # Retry certain error codes if there's no dir_list
             # Don't bother with 3010 at the moment because there's that Hadoop bug
-            okay = error_code == '3010' or \
-                (bool(dir_list) if error_code in ['!', '3005'] else False)
+            okay = (error_code == '3010' and 'operation not permitted' in status.message) or \
+                (bool(dir_list) and error_code in ['!', '3005'])
 
             self.log.debug('Error code: %s', error_code)
             self.log.debug('Directory List: %s', dir_list)
@@ -219,7 +219,8 @@ def get_site_tree(site):
 
     min_threads = config.config_dict().get('MinThreads', 0)
 
-    if site in config.config_dict().get('UseLoadBalancer', []):
+    if site in config.config_dict().get('UseLoadBalancer', []) or \
+            (balancer and not door_list):
         min_threads = 1
         door_list = [balancer]
 

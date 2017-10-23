@@ -1,3 +1,4 @@
+
 <?php
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -22,6 +23,8 @@ error_reporting(E_ALL);
                           '.site WHERE isgood = ' . $isgood . ' ORDER BY site');
 
   }
+
+  $config = json_decode(file_get_contents('consistency_config.json'), true);
 
   include 'output.html';
 

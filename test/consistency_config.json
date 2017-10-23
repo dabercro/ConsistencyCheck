@@ -34,5 +34,6 @@
     "T2_US_Vanderbilt"
   ],
   "WebDir": "www",
-  "MaxMissing": 100
+  "MaxMissing": 100,
+  "MaxOrphanFraction": 0.1
 }
